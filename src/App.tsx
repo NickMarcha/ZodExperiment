@@ -1,13 +1,13 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
-import {User, userBaseSchema, UserUpdate, userUpdateSchema} from "./User";
+import {SampleUser, User, userBaseSchema, UserUpdate, userUpdateSchema} from "./User";
 import {Simulate} from "react-dom/test-utils";
 import error = Simulate.error;
-import {ZodIssue} from "zod";
+import {number, ZodIssue} from "zod";
 
 function App() {
   //Faking stuff
-  const [dbUser, setDbUser] = useState({id: 123, name: "Jhonny", email: "Jhonny@Vegas.com", password: "MySecret1Password!"})
+  const [dbUser, setDbUser] = useState(SampleUser)
   async function getUserFromFakeAPI(){
     await new Promise(f => setTimeout(f, 1000));
     return dbUser;
@@ -15,7 +15,7 @@ function App() {
 
   async function getBrokenUserFromFakeAPi(){
     await new Promise(f => setTimeout(f, 1000));
-    return {id: 123, name:123, email: "Jhonny@Vegas.com", password: "MySecretPassword"};
+    return {id: 123, name:"Jhonny", email: "Jhonny@Vegas.com", password: "MySecretPassword",favoriteColor:"Blue"};
   }
 
 
@@ -53,7 +53,25 @@ function App() {
   function UpdateUserExample(){
     const [updateUserData, setUpdateUserData] = useState<UserUpdate>(null as unknown as UserUpdate);
 
+    const [colorStr, setColorStr] = useState("black")
+
+
     const[zodIssues, setZodIssues] = useState<ZodIssue[]>([]);
+
+    function validate () {
+      const parseResult = userUpdateSchema.safeParse(updateUserData)
+      if(parseResult.success){
+        setZodIssues([]);
+        setColorStr("black")
+      }else {
+        setZodIssues(parseResult.error.errors)
+      }
+    }
+
+    useEffect(() => {
+      validate()
+
+    }, [updateUserData]);
     async function updateUser(){
       //check if User Valid
       const parseResult = userUpdateSchema.safeParse(updateUserData)
@@ -63,7 +81,7 @@ function App() {
         setDbUser(updateUserData as User)
 
       }else {
-
+        setColorStr("red")
         setZodIssues(parseResult.error.errors)
       }
     }
@@ -74,30 +92,27 @@ function App() {
       }
       return <>No User to update</>
     }
+
     return(
         <>
-        <form>
+        <form >
           <input value={userResult?.id} disabled={true} />
           <label>id</label>
           <br/><br/>
-          <input typeof="text" value={updateUserData.name} onChange={(event) => setUpdateUserData(prev => {return {...prev, name: event.target.value}})} />
-          <label>name</label>
-          <br/>
-          <div style={{whiteSpace:"pre-wrap"}}>{zodIssues.filter(issue => issue.path.some(p=> p==="name"))?.map(zi => " - "+ zi.message).join(",\n")}</div>
-          <br/>
-
-          <input typeof="text" value={updateUserData.email} onChange={(event) => setUpdateUserData(prev => {return {...prev, email: event.target.value}})} />
-          <label>email</label>
-          <br/>
-          <div style={{whiteSpace:"pre-wrap"}}>{zodIssues.filter(issue => issue.path.some(p=> p==="email"))?.map(zi => " - "+ zi.message).join(",\n")}</div>
-          <br/>
-
-          <input typeof="text" value={updateUserData.password} onChange={(event) => setUpdateUserData(prev => {return {...prev, password: event.target.value}})} />
-          <label>password</label>
-          <br/>
-          <div style={{whiteSpace:"pre-wrap"}}>{zodIssues.filter(issue => issue.path.some(p=> p==="password"))?.map(zi => " - "+ zi.message).join(",\n")}</div>
-          <br/>
-
+          {Object.entries(updateUserData).filter(([key,value], index) => {
+            return key !== "id";
+          }).map(([key,value]) =>(<>
+                {typeof value === "string" &&(
+                    <input type="text" value={value} onChange={(event) => setUpdateUserData(prev => {return {...prev, [key]: event.target.value}})} />
+                )}
+                {typeof value ==="number" &&(
+                    <input type="number" value={value} onChange={(event) => setUpdateUserData(prev => {return {...prev, [key]: event.target.valueAsNumber}})} />
+                )}
+              <label>{key}</label>
+              <br/>
+              <div style={{whiteSpace:"pre-wrap",color:colorStr}}>{zodIssues.filter(issue => issue.path.some(p=> p===key))?.map(zi => " - "+ zi.message).join("\n")}</div>
+              <br/>
+        </>))}
         </form>
           <button onClick={() => updateUser()}> Update</button>
         </>
@@ -105,15 +120,12 @@ function App() {
   }
   return (
     <div className="App">
-
       <h1>Fetch</h1>
       <button onClick={()=>getUser(getUserFromFakeAPI)}>Get User</button>
       <button onClick={()=>getUser(getBrokenUserFromFakeAPi)}>Get Broken User</button>
       <FetchExample/>
       <h1>Update User</h1>
       <UpdateUserExample/>
-
-
     </div>
   );
 }

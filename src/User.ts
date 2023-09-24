@@ -11,9 +11,20 @@ export const userBaseSchema = z.object({
     name: z.string().min(5).max(20),
     email: z.string().email(),
     password: passwordSchema,
+    age: z.number().min(16).max(100),
+    favoriteColor: z.enum(["Blue","Yellow"], {
+        errorMap: (issue, ctx) => ({ message: 'Choose  good COlor' })
+    })
 });
 
-
+export const SampleUser = {
+    id: 123,
+    name: "Jhonny",
+    email: "Jhonny@Vegas.com",
+    password: "MySecret1Password!",
+    age:35,
+    favoriteColor:"Blue"
+}
 
 export type User = z.infer<typeof userBaseSchema>;
 
