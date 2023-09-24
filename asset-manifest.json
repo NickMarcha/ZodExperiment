@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ZodExperiment/static/css/main.073c9b0a.css",
+    "main.js": "/ZodExperiment/static/js/main.7f1715c5.js",
+    "static/js/787.28cb0dcd.chunk.js": "/ZodExperiment/static/js/787.28cb0dcd.chunk.js",
+    "index.html": "/ZodExperiment/index.html",
+    "main.073c9b0a.css.map": "/ZodExperiment/static/css/main.073c9b0a.css.map",
+    "main.7f1715c5.js.map": "/ZodExperiment/static/js/main.7f1715c5.js.map",
+    "787.28cb0dcd.chunk.js.map": "/ZodExperiment/static/js/787.28cb0dcd.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.7f1715c5.js"
+  ]
+}
